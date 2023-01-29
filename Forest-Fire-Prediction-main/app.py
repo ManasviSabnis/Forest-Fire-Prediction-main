@@ -18,7 +18,11 @@ mongo = MongoClient('mongodb+srv://forestfire:forestfire@cluster0.dv0krch.mongod
 app = Flask(__name__)
 app.secret_key = "man"
 
-#model=joblib.load('forestfiremodel.pkl')
+model=joblib.load('forestfiremodel.pkl')
+#model = open("D:\sabni\Documents\GitHub\Forest-Fire-Prediction-main\Forest-Fire-Prediction-main\forestfiremodel.pkl", 'rb')
+#codedata = pickle.load(model)
+#model.close()
+#model=open(r"D:\sabni\Documents\GitHub\Forest-Fire-Prediction-main\Forest-Fire-Prediction-main\forestfiremodel.pkl")
 
 @app.route('/')
 def hello_world():

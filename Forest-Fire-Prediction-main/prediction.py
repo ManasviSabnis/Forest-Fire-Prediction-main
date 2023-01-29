@@ -36,7 +36,7 @@ nn_classifier_model=MLPClassifier(activation='relu',hidden_layer_sizes=(16,16),n
 nn_classifier_model.fit(X_train,Y_train)
 
 model=joblib.dump(nn_classifier_model,'forestfiremodel.pkl')
-
+#model=open(r"D:\sabni\Documents\GitHub\Forest-Fire-Prediction-main\Forest-Fire-Prediction-main\forestfiremodel.pkl")
 
 
 
