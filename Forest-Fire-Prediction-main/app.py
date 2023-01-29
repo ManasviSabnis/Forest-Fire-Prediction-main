@@ -9,6 +9,7 @@ import json
 import os
 from werkzeug.datastructures import ResponseCacheControl
 from werkzeug.utils import secure_filename
+from flask import Flask, render_template, url_for, request, session, redirect, flash, Response
 
 
 from flask_pymongo import PyMongo
@@ -32,13 +33,24 @@ def hello_world():
 def insert_sheet():
     return render_template('insert_sheet.html')
 
+@app.route('/show', methods=['GET','POST'])
+def show():
+        # features="lxml"
+        #a = pd.read_csv(request.form['usernameid'] + ".csv")
+    
+        
+        # print(b)
+        # print (request.form["seat_no"])
+        return render_template('show.html')
+
+
 @app.route('/create', methods=['POST'])
 
 def create():
     if 'upload_file' in request.files:
         upload_file = request.files['upload_file']
         # print('dirname:     ', os.path.dirname(__file__))
-        upload_file.save(os.path.join( os.path.dirname(__file__), secure_filename(request.form['month'] + request.form['day'] + ".csv")))
+        upload_file.save(os.path.join( os.path.dirname(__file__), secure_filename(request.form['usernameid'] +  ".csv")))
 
         #df = pd.read_csv(upload_file.filename)
 
@@ -47,7 +59,7 @@ def create():
         #json_object=df.to_json()
         #print(json_object)
 
-        csvFilePath = request.form['month'] + request.form['day'] + ".csv"
+        csvFilePath = request.form['usernameid'] +  ".csv"
 
         
         # print(a)
@@ -60,28 +72,20 @@ def create():
         with open(csvFilePath,  encoding='utf-8-sig') as csvf:
             csvReader = csv.DictReader(csvf)
 
-            for rows in csvReader:
+           
                 # print(rows)
              
             # Assuming a column named 'No' to
             # be the primary key
-                key = rows['X']
-                dict1[key] = rows
-
-        # json_object = json.dumps(dict1, indent = 4)
-            for j in dict1:
-                for k,v in dict1[j].items():
-                    newK = k.replace('\n', '')
-                    newK2 = newK.replace(' ','')
-                    # if v != "": 
-                    corrected_dict[newK2.replace('.', '')] = v 
+               
                 #print(corrected_dict)
-                mongo.test[request.form['month'] + request.form['day']].insert({'upload_file': corrected_dict})
+                #mongo.test[request.form['usernameid']].insert({'upload_file': corrected_dict})
                 # print(corrected_dict)
     # return (request.form['Year'], request.form['Semester'], request.form['Branch'])
     # return redirect('/dashboard') 
-    flash("Successfully Uploaded File!")
-    return redirect(url_for('index'))
+    #mongo.test[request.form['usernameid']].insert({'usernameid':request.form['usernameid'],'upload_file': corrected_dict})
+    #flash("Successfully Uploaded File!")
+    return render_template('index.html',pred='Successfully Uploaded File!')
 
 
 @app.route('/predict',methods=['POST','GET'])
