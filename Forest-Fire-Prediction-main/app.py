@@ -18,7 +18,8 @@ from pymongo import MongoClient, ssl_support
 mongo = MongoClient('mongodb+srv://forestfire:forestfire@cluster0.dv0krch.mongodb.net/test')
 app = Flask(__name__)
 app.secret_key = "man"
-
+db=mongo['Forest']
+collection=db["manasvi"]
 model=joblib.load('forestfiremodel.pkl')
 #model = open("D:\sabni\Documents\GitHub\Forest-Fire-Prediction-main\Forest-Fire-Prediction-main\forestfiremodel.pkl", 'rb')
 #codedata = pickle.load(model)
@@ -37,7 +38,15 @@ def insert_sheet():
 def show():
         # features="lxml"
         #a = pd.read_csv(request.form['usernameid'] + ".csv")
-    
+        if request.method=='POST' :
+            day=request.form.get("day")
+            month=(request.form.get("month"))
+            print(day,month)
+            for doc in collection.find({"month":month,"day":day}) :
+             print(doc)
+             
+
+        return render_template('show.html')
         
         # print(b)
         # print (request.form["seat_no"])
@@ -48,10 +57,26 @@ def show():
 
 def create():
     if 'upload_file' in request.files:
+        collection.delete_many({})
         upload_file = request.files['upload_file']
         # print('dirname:     ', os.path.dirname(__file__))
-        upload_file.save(os.path.join( os.path.dirname(__file__), secure_filename(request.form['usernameid'] +  ".csv")))
-
+        file_path=os.path.join( os.path.dirname(__file__), secure_filename(request.form['usernameid'] +  ".csv"))
+        upload_file.save(file_path)
+        df=pd.read_csv(file_path)
+        x=df[["FFMC","DMC","DC","ISI","temp","RH","wind","rain"]].values
+        #y=(model.predict_proba(x))
+        # df["predict_proba"]=y[:,1]
+        # return df.to_html()
+        y=(model.predict(x))
+        df[["no fire probability ","fire probability"]]=model.predict_proba(x)
+        df["is fire"]=y
+        df["is fire"]=df["is fire"].map({0:"no fire",1:"fire"})
+        with open (file_path) as f :
+            data=csv.DictReader(f)
+            print(data)
+            collection.insert_many(data)
+       
+        return df.to_html()
         #df = pd.read_csv(upload_file.filename)
 
         #df.fillna('', inplace = True)
@@ -61,20 +86,15 @@ def create():
 
         csvFilePath = request.form['usernameid'] +  ".csv"
 
+
         
         # print(a)
 
-
-        dict1 ={}
-
-        corrected_dict = {}
-
-        with open(csvFilePath,  encoding='utf-8-sig') as csvf:
-            csvReader = csv.DictReader(csvf)
-
-           
-                # print(rows)
-             
+        with open (file_path) as f :
+            data=csv.DictReader(f)
+            print(data)
+            collection.insert_many(data)
+       
             # Assuming a column named 'No' to
             # be the primary key
                
@@ -101,6 +121,7 @@ def predict():
         return render_template('index.html',pred='Your Forest is in Danger.\nProbability of fire occuring is {}'.format(output))
     else:
         return render_template('index.html',pred='Your Forest is safe.\n Probability of fire occuring is {}'.format(output))
+    #values input > loading it into model (pretrained model is loaded) >predict_proba 
 
 
 if __name__ == '__main__':
